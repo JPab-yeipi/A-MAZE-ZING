@@ -11,7 +11,7 @@ pantalla.bgcolor("#34b800")
 #Configuracion basica:
 t.title("Laberinto con backtracking - Jose Pablo Garcia Zamudio")
 t.shape("turtle")
-t.speed(5)
+t.speed(10)
 
 #Variables:
 Tamaño_celda = 24
@@ -55,7 +55,7 @@ Laberinto_2 = [
     "##### # ### ### ### ### ### # # #",
     "#     #   #   #   #     #   # # #",
     "# ### ### ### ##### ##### ### # #",
-    "#   #     #     #     #     #   #",
+    "#   #                 #     #   #",
     "### # ### ### ### ### ### #######",
     "#   # #     #   #   #   #       #",
     "# ### ##### ### ### # ### ##### #",
@@ -186,6 +186,68 @@ def encontrar_inicio(laberinto):
      
     raise ValueError("No se encontró el punto de inicio en el laberinto.")
 
+def orientacion_turtle(direccion):
+
+    if direccion == (1,0):
+        t.setheading(0)
+    elif direccion == (0, 1):
+        t.setheading(270)
+    elif direccion == (-1, 0):
+        t.setheading(180)
+    elif direccion == (0, -1):
+        t.setheading(90)
+
+
+def buscar_meta(laberinto, x, y, visitados, ruta_actual):
+    if laberinto[y][x] == 'G':
+        ruta_actual.append((x, y))
+        t.dot(10, "blue")
+        return True
+
+    if (x, y) in visitados or laberinto[y][x] == '#':
+        return False
+
+    visitados.add((x, y))
+    ruta_actual.append((x, y))
+
+    # Mover la tortuga a la celda actual
+    screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
+    screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
+    t.goto(screen_x, screen_y)
+    time.sleep(0.02)
+
+    # Direcciones: derecha, abajo, izquierda, arriba
+    direcciones = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+
+    for dx, dy in direcciones:
+        nuevo_x, nuevo_y = x + dx, y + dy
+
+        if 0 <= nuevo_y < len(laberinto) and 0 <= nuevo_x < len(laberinto[0]):
+            if laberinto[nuevo_y][nuevo_x] != '#' and (nuevo_x, nuevo_y) not in visitados:
+                orientacion_turtle((dx, dy))
+
+                if buscar_meta(laberinto, nuevo_x, nuevo_y, visitados, ruta_actual):
+                    t.dot(10, "blue")
+                    return True
+
+    # Punto sin salida (gris)
+    t.dot(8, "gray")
+
+    # Retroceso físico
+    ruta_actual.pop()
+    if len(ruta_actual) > 0:
+        paso_anterior = ruta_actual[-1]
+        dx = paso_anterior[0] - x
+        dy = paso_anterior[1] - y
+        orientacion_turtle((dx, dy))
+
+        screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + paso_anterior[0] * Tamaño_celda + Tamaño_celda // 2
+        screen_y = len(laberinto) * Tamaño_celda // 2 - paso_anterior[1] * Tamaño_celda - Tamaño_celda // 2
+        t.goto(screen_x, screen_y)
+        time.sleep(0.02)
+
+    return False
+
 
 def main():
     t.tracer(0)
@@ -208,8 +270,15 @@ def main():
 
     dibujar_laberinto(laberinto)
 
-    #x_inicio, y_inicio = encontrar_inicio(laberinto)
-    encontrar_inicio(laberinto)
+    x_inicio, y_inicio = encontrar_inicio(laberinto)
+
+    ruta_actual = []
+    visitados = set()
+    buscar_meta(laberinto, x_inicio, y_inicio, visitados, ruta_actual)
+
+    print("Ruta encontrada: ")
+    for paso in ruta_actual:
+        print(paso)
 
     t.update()
     t.mainloop()
