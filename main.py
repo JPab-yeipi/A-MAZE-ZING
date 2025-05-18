@@ -5,6 +5,7 @@ import random
 
 #Creacion de pantalla:
 pantalla = t.Screen()
+pantalla.setup(width=1050, height=700)
 pantalla.bgcolor("#34b800")
 
 #Configuracion basica:
@@ -85,20 +86,26 @@ Laberinto_3 = [
     "#################################"
 ]
 
-#Laberinto 4 - Estilo en espiral:
+#Laberinto 4 - Pasillos angostos y vueltas falsas:
 Laberinto_4 = [
     "#################################",
-    "#S      #         #           G#",
-    "# ####### ####### ####### ##### #",
-    "# #     #       #       #     # #",
-    "# # ### ####### ####### ##### # #",
-    "# # #   #     #       #     # # #",
-    "# # # ### ### ##### ##### ### # #",
-    "# # # #   # #   #   #   #   # # #",
-    "# # ### # # ### # # # # # # # # #",
-    "# #   # # #     # # # # # #   # #",
-    "# ### ### ######### # # ####### #",
-    "#     #             #           #",
+    "#S    #       #       #       # #",
+    "# ### # ##### # ##### # ##### # #",
+    "# #   #     # #     # #     # # #",
+    "# # ####### ####### ##### ### # #",
+    "# #         #   #       #   #   #",
+    "# ######### # # ####### # ### ###",
+    "#       #   # #       # #     # #",
+    "####### # ### ##### # ######### #",
+    "#     # #   #     # #     #     #",
+    "# ### # ### ##### ### ### ### # #",
+    "#   #     # #   #     # #   # # #",
+    "### ##### # # # ####### # # # # #",
+    "#   #     # # #       # # #   # #",
+    "# # # ##### # ##### ### ####### #",
+    "# # #       #     #   #         #",
+    "# # ########### # ### ######### #",
+    "# #             #             G #",
     "#################################"
 ]
 
@@ -162,12 +169,48 @@ def dibujar_laberinto(laberinto):
             else:
                 dibujar_cuadrado(screen_x, screen_y, "white")
  
+def encontrar_inicio(laberinto):
+    for y in range(len(laberinto)):
+        for x in range(len(laberinto[y])):
+            if laberinto[y][x] == 'S':
+
+                screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda
+                screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda
+
+                t.penup()
+                t.goto(screen_x + Tamaño_celda // 2, screen_y - Tamaño_celda // 2)
+                t.setheading(0)
+                t.pendown()
+
+                return x, y
+     
+    raise ValueError("No se encontró el punto de inicio en el laberinto.")
+
 
 def main():
     t.tracer(0)
-    Laberintos = [Laberinto_1, Laberinto_2, Laberinto_3, Laberinto_4, Laberinto_5]
+    Laberintos = [[Laberinto_1, "Laberinto 1 - Curvas locas y un solo camino correcto"],
+                  [Laberinto_2, "Laberinto 2 - Rutas falsas y cruces múltiples"],
+                  [Laberinto_3, "Laberinto 3 - Muchos recovecos"],
+                  [Laberinto_4, "Laberinto 4 - Pasillos angostos y vueltas falsas"],
+                  [Laberinto_5, "Laberinto 5 - Caminos válidos múltiples"]
+                 ]
     The_Maze = random.choice(Laberintos)
-    dibujar_laberinto(The_Maze)
+    laberinto = The_Maze[0]
+    nombre = The_Maze[1]
+
+    titulo = t.Turtle()
+    titulo.hideturtle()
+    titulo.penup()
+    titulo.color("black")
+    titulo.goto(0, 280)
+    titulo.write(nombre, align="center", font=("Arial", 40, "bold"))
+
+    dibujar_laberinto(laberinto)
+
+    #x_inicio, y_inicio = encontrar_inicio(laberinto)
+    encontrar_inicio(laberinto)
+
     t.update()
     t.mainloop()
 
