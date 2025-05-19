@@ -87,23 +87,23 @@ Laberinto_3 = [
 #Laberinto 4 - Pasillos angostos y vueltas falsas:
 Laberinto_4 = [
     "#################################",
-    "#S    #       #       #       # #",
-    "# ### # ##### # ##### # ##### # #",
-    "# #   #     # #     # #     # # #",
+    "#S    #       #               # #",
+    "# ### # #####   ##### ####### # #",
+    "# #           #     #       # # #",
     "# # ####### ####### ##### ### # #",
-    "# #         #   #       #   #   #",
-    "# ######### # # ####### # ### ###",
-    "#       #   # #       # #     # #",
+    "# #         #   #           #   #",
+    "# ######### # ######### # ### ###",
+    "#       #     #G      # #     # #",
     "####### # ### ##### # ######### #",
     "#     # #   #     # #     #     #",
     "# ### # ### ##### ### ### ### # #",
     "#   #     # #   #     # #   # # #",
     "### ##### # # # ####### # # # # #",
     "#   #     # # #       # # #   # #",
-    "# # # ##### # ##### ### ####### #",
+    "# # # ##### # ## ## ### ####### #",
     "# # #       #     #   #         #",
-    "# # ########### # ### ######### #",
-    "# #             #             G #",
+    "# # ############# ### ######### #",
+    "# #                             #",
     "#################################"
 ]
 
@@ -116,7 +116,7 @@ Laberinto_5 = [
     "# # ##### ### # ####### ##### # #",
     "# #     #     #       #     # # #",
     "# ### # ### ######### ### ### # #",
-    "#   # #     #   #     #   #   # #",
+    "#   # #     #  G#     #   #   # #",
     "### # ### ### ### ##### ### ### #",
     "#   #   #   #   #     #   #     #",
     "# ### ### ### ### ### ### ##### #",
@@ -126,7 +126,7 @@ Laberinto_5 = [
     "# ##### ### # ### ##### # ### # #",
     "#     #     # #         #     # #",
     "##### ### ### ### ########### # #",
-    "#           #               G#  #",
+    "#           #                #  #",
     "#################################"
 ]
 
@@ -272,14 +272,15 @@ def camino_mas_corto(laberinto, inicio, meta):
                 if laberinto[ny][nx] != '#' and (nx, ny) not in visitados:
                     queue.append(((nx, ny), ruta + [(nx, ny)]))
                     visitados.add((nx, ny))
+    return []
 
 def main():
     t.tracer(0)
     Laberintos = [[Laberinto_1, "Maze 1"],
                   [Laberinto_2, "Maze 2"],
-                  [Laberinto_3, "Maze 3"]
-                  #[Laberinto_4, "Laberinto 4 - Pasillos angostos y vueltas falsas"],
-                  #[Laberinto_5, "Laberinto 5 - Caminos válidos múltiples"]
+                  [Laberinto_3, "Maze 3"],
+                  [Laberinto_4, "Maze 4"],
+                  [Laberinto_5, "Maze 5"]
                  ]
     The_Maze = random.choice(Laberintos)
     laberinto = The_Maze[0]
@@ -309,17 +310,27 @@ def main():
     ruta_corta = camino_mas_corto(laberinto, (x_inicio, y_inicio), (x_meta, y_meta))
 
     time.sleep(1)
-    for (x, y) in ruta_corta:
+    t.showturtle()
+
+    for i in range(len(ruta_corta)):
+        x, y = ruta_corta[i]
+        
+        # Detectar dirección (excepto en el primer paso)
+        if i > 0:
+            x_ant, y_ant = ruta_corta[i - 1]
+            dx = x - x_ant
+            dy = y - y_ant
+            orientacion_turtle((dx, dy))
+
+        # Mover la tortuga y pintar
         screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
         screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
         t.goto(screen_x, screen_y)
         t.dot(10, "blue")
-        pantalla.update
+        pantalla.update()
         time.sleep(0.05)
-
+    
     t.mainloop()
 
 if __name__ == "__main__":
     main()
-
-
