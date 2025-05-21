@@ -2,6 +2,7 @@
 import turtle as t
 import time
 import random
+import maps
 from collections import deque
 
 #Creacion de pantalla:
@@ -327,8 +328,10 @@ def main():
         screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
         t.goto(screen_x, screen_y)
         t.dot(10, "blue")
+        
         pantalla.update()
         time.sleep(0.05)
+        
     
     t.mainloop()
 
