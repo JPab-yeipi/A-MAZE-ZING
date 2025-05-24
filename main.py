@@ -1,4 +1,4 @@
-#Librerias:
+#Librerias -----------------------------------------------------------------------
 import turtle as t
 import time
 import maps
@@ -6,10 +6,10 @@ import tkinter as tk
 from collections import deque
 from turtle import RawTurtle, ScrolledCanvas
 
-#Variables:
+#Variables ------------------------------------------------------------------------
 Tamaño_celda = 15
 
-#Funciones:
+#Funciones ------------------------------------------------------------------------
 #Funcion para dibujar cuadrados:
 def dibujar_cuadrado(turtle, x, y, color):
 
@@ -27,12 +27,17 @@ def dibujar_cuadrado(turtle, x, y, color):
 
 #Funcion para dibujar laberintos:
 def dibujar_laberinto(turtle, laberinto):
+    #Recorre las celdas del laberinto:
     for y in range(len(laberinto)):
         for x in range(len(laberinto[y])):
+            #centra el laberinto en el frame:
             screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda
             screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda
+
+            #Guarda el valor de la celda actual:
             celda = laberinto[y][x]
 
+            #Eleccion de colores de acuerdo a el simbolo:
             if celda == '#':
                 dibujar_cuadrado(turtle, screen_x, screen_y, "black")
 
@@ -45,24 +50,33 @@ def dibujar_laberinto(turtle, laberinto):
             else:
                 dibujar_cuadrado(turtle, screen_x, screen_y, "white")
  
+#Funcion para encontrar el inicio del laberinto:
 def encontrar_inicio(turtle, laberinto):
+    #Recorre las celdas del laberinto:
     for y in range(len(laberinto)):
         for x in range(len(laberinto[y])):
+            #Detecta la celda con la letra S (Start):
             if laberinto[y][x] == 'S':
-
+                
+                #Coordenadas de S:
                 screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda
                 screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda
 
+                #la tortuga se coloca en S
                 turtle.penup()
                 turtle.goto(screen_x + Tamaño_celda // 2, screen_y - Tamaño_celda // 2)
                 turtle.setheading(0)
 
+                #Devuelve la posicion de S:
                 return x, y
-     
+    
+    #Si no se encuentra S, manda un error:
     raise ValueError("No se encontró el punto de inicio en el laberinto.")
 
+#Funcion para orientar tortuga depende a la direccion a la cual ira:
 def orientacion_turtle(turtle, direccion):
 
+    #Modifica el angulo de direccion de acuerdo a la direccion deseada:
     if direccion == (1,0):
         turtle.setheading(0)
     elif direccion == (0, 1):
@@ -72,8 +86,9 @@ def orientacion_turtle(turtle, direccion):
     elif direccion == (0, -1):
         turtle.setheading(90)
 
-
+#Funcion para encontrar la meta con backtracking:
 def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
+    #En caso de que se encuentre la meta:
     if laberinto[y][x] == 'G':
         ruta_actual.append((x, y))
         screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
@@ -84,9 +99,11 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
         turtle.getscreen().update()
         return True
 
+    #Evitar repetir o chocar con muros:
     if (x, y) in visitados or laberinto[y][x] == '#':
         return False
 
+    #Marca la celda actual como visitada para futuro conocimiento:
     visitados.add((x, y))
     ruta_actual.append((x, y))
 
@@ -101,6 +118,7 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
     # Direcciones: derecha, abajo, izquierda, arriba
     direcciones = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
+    #Explora en cada direccion:
     for dx, dy in direcciones:
         nuevo_x, nuevo_y = x + dx, y + dy
 
@@ -112,8 +130,8 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
                     turtle.dot(10, "blue")
                     return True
 
-    # Punto sin salida (gris)
-    turtle.dot(10, "orange")
+    # Punto sin salida se marca de color naranja:
+    turtle.dot(10, "purple")
 
     # Retroceso físico
     ruta_actual.pop()
