@@ -1,4 +1,4 @@
-#Librerias -----------------------------------------------------------------------
+#Librerias ----------------------------------------------------------------------------------------------
 import turtle as t
 import time
 import maps
@@ -8,12 +8,12 @@ import os
 from collections import deque
 from turtle import RawTurtle, ScrolledCanvas
 
-#Ruta de assets -------------------------------------------------------------------
+#Ruta de assets -----------------------------------------------------------------------------------------
 RUTA_TITULO_AMZ = os.path.join("Assets", "AMAZEZINGTtl.png")
 RUTA_BOTONES = os.path.join("Assets", "Botones")
 RUTA_PREVIEWS = os.path.join("Assets", "Preview")
 
-#Variables  -----------------------------------------------------------------------
+#Variables  ---------------------------------------------------------------------------------------------
 Tamaño_celda = 15
 colores = ["Rojo", "Azul", "Amarillo", "Verde"]
 metodos = [
@@ -27,7 +27,7 @@ metodos = [
         ("Your Maze", 2, 4, "Rojo")
 ]
 
-#Funciones ------------------------------------------------------------------------
+#Funciones ----------------------------------------------------------------------------------------------
 #Funcion para dibujar cuadrados:
 def dibujar_cuadrado(turtle, x, y, color):
 
@@ -246,7 +246,7 @@ def mostrar_laberinto(nombre):
 
     ventana_laberinto.mainloop()
 
-#Funcion main (llama las funciones anteriores en el orden deseado):
+#Funcion main (llama las funciones anteriores en el orden deseado) --------------------------------------
 def main():
 
     #Configuracion de la ventana:
