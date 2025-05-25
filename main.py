@@ -131,7 +131,7 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
                     return True
 
     # Punto sin salida se marca de color naranja:
-    turtle.dot(10, "purple")
+    turtle.dot(10, "orange")
 
     # Retroceso físico
     ruta_actual.pop()
@@ -149,6 +149,8 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
         time.sleep(0.02)
 
     return False
+
+#TE QUEDASTE AQUI ---------------------------------------
 
 def camino_mas_corto(laberinto, inicio, meta):
     queue = deque()
