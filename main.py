@@ -11,6 +11,7 @@ from turtle import RawTurtle, ScrolledCanvas
 #Ruta de assets -------------------------------------------------------------------
 RUTA_TITULO_AMZ = os.path.join("Assets", "AMAZEZINGTtl.png")
 RUTA_BOTONES = os.path.join("Assets", "Botones")
+RUTA_PREVIEWS = os.path.join("Assets", "Preview")
 
 #Variables  -----------------------------------------------------------------------
 Tamaño_celda = 15
@@ -251,30 +252,46 @@ def main():
     #Configuracion de la ventana:
     menu_principal = tk.Tk()
     menu_principal.title("A-MAZE-ZING")
-    menu_principal.geometry("525x727")
+    menu_principal.geometry("525x750")
     menu_principal.configure(bg="#292826")
     menu_principal.resizable(False, False)
 
-    #Agregar logo de la applicacion:
+    #Agregar el logo de la aplicacion:
     Titulo_Amazezing = PhotoImage(file=RUTA_TITULO_AMZ)
     frame_titulo = tk.Frame(menu_principal, bg="#292826")
     frame_titulo.pack(pady=10)
     tk.Label(frame_titulo, image=Titulo_Amazezing, bg="#292826").pack(pady=10)
 
+    #Fuente en variable para que concuerden los textos:
+    fuente = ("Arial Black", 20)
+
     #Canvas para botones:
     frame_canvas = tk.Frame(menu_principal, bg="#292826")
     frame_canvas.pack()
-    canvas = tk.Canvas(frame_canvas, width=1100, height=430, bg="#292826", highlightthickness=0)
+    canvas = tk.Canvas(frame_canvas, width=1100, height=340, bg="#292826", highlightthickness=0)
     canvas.pack()
 
     #Cargar botones:
     botones_on = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}On.png')) for color in colores}
     botones_off = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}Off.png')) for color in colores}
 
-    fuente = ("Arial Black", 20)
+    #Diccionario para guardar previews:
+    previews = {}
+    for texto, _, _, _ in metodos:
+        numero = ''.join(filter(str.isdigit, texto))
+        if numero:
+            nombre_preview = f"Maze{numero}_preview.png"
+            ruta_preview = os.path.join(RUTA_PREVIEWS, nombre_preview)
+            if os.path.exists(ruta_preview):
+                previews[texto] = PhotoImage(file=ruta_preview)
+
+    #Label de preview oculto:
+    label_preview = tk.Label(menu_principal, bg="#292826")
+    
     espacio_x = 260
     espacio_y = 85
 
+    #Botones con efecto al ser presionados:
     for texto, col, fila, color in metodos:
         x = espacio_x * col - espacio_x / 2
         y = espacio_y * fila - espacio_y / 2
@@ -296,14 +313,44 @@ def main():
             canvas.move(sombra, 0, -6)
             abrir_ventana_laberinto(nombre)
 
+        #Funciones para mostrar/ocultar preview según el botón
+        def mostrar_preview(event, nombre=texto):
+            if nombre in previews:
+                label_preview.config(image=previews[nombre])
+                x = event.x_root - menu_principal.winfo_rootx() + 5
+                y = event.y_root - menu_principal.winfo_rooty() + 14
+                label_preview.place(x=x, y=y)
+
+        def mover_preview(event, nombre=texto):
+            if nombre in previews:
+                x = event.x_root - menu_principal.winfo_rootx() + 5
+                y = event.y_root - menu_principal.winfo_rooty() + 14
+                label_preview.place(x=x, y=y)
+
+        def ocultar_preview(event):
+            label_preview.place_forget()
+
         for item in [imagen_id, texto_id, sombra_id]:
+            canvas.tag_bind(item, "<Enter>", mostrar_preview)
+            canvas.tag_bind(item, "<Motion>", mover_preview) 
+            canvas.tag_bind(item, "<Leave>", ocultar_preview)
             canvas.tag_bind(item, "<ButtonPress-1>", al_presionar)
             canvas.tag_bind(item, "<ButtonRelease-1>", al_soltar)
 
-    #Funcion para cerrar la ventana del menu al seleccionar laberinto
+    #Funcion para cerrar la ventana del menu al seleccionar laberinto:
     def abrir_ventana_laberinto(nombre):
         menu_principal.destroy()
         mostrar_laberinto(nombre)
+
+    #Texto con derechos de autor en el inferior de la ventana:
+    derechos_autor = tk.Label(
+        menu_principal,
+        text="Developed by Jose Pablo Garcia Zamudio. All rights reserved.",
+        font=("Arial", 16),
+        fg="white",
+        bg="#292826"
+    )
+    derechos_autor.pack(side="bottom", pady=5)
 
     menu_principal.mainloop()
 
