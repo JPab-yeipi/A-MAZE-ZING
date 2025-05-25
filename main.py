@@ -271,7 +271,7 @@ def main():
     botones_on = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}On.png')) for color in colores}
     botones_off = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}Off.png')) for color in colores}
 
-    fuente = ("Arial", 20)
+    fuente = ("Arial Black", 20)
     espacio_x = 260
     espacio_y = 85
 
