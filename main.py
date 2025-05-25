@@ -3,11 +3,28 @@ import turtle as t
 import time
 import maps
 import tkinter as tk
+from tkinter import PhotoImage
+import os
 from collections import deque
 from turtle import RawTurtle, ScrolledCanvas
 
-#Variables ------------------------------------------------------------------------
+#Ruta de assets -------------------------------------------------------------------
+RUTA_TITULO_AMZ = os.path.join("Assets", "AMAZEZINGTtl.png")
+RUTA_BOTONES = os.path.join("Assets", "Botones")
+
+#Variables  -----------------------------------------------------------------------
 Tamaño_celda = 15
+colores = ["Rojo", "Azul", "Amarillo", "Verde"]
+metodos = [
+        ("Maze 1", 1, 1, "Verde"),
+        ("Maze 2", 2, 1, "Azul"),
+        ("Maze 3", 1, 2, "Rojo"),
+        ("Maze 4", 2, 2, "Amarillo"),
+        ("Maze 5", 1, 3, "Azul"),
+        ("Maze 6", 2, 3, "Verde"),
+        ("Maze 7", 1, 4, "Amarillo"),
+        ("Your Maze", 2, 4, "Rojo")
+]
 
 #Funciones ------------------------------------------------------------------------
 #Funcion para dibujar cuadrados:
@@ -150,8 +167,7 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
 
     return False
 
-#TE QUEDASTE AQUI ---------------------------------------
-
+#Funcion para encontrar el camino mas eficiente del laberinto:
 def camino_mas_corto(laberinto, inicio, meta):
     queue = deque()
     queue.append((inicio, [inicio]))
@@ -172,11 +188,12 @@ def camino_mas_corto(laberinto, inicio, meta):
                     visitados.add((nx, ny))
     return []
 
+#Funcion que imprime el laberinto a resolver:
 def mostrar_laberinto(nombre):
     ventana_laberinto = tk.Tk()
     ventana_laberinto.title(f'Laberinto - {nombre}')
     ventana_laberinto.geometry("1000x700")
-    ventana_laberinto.configure(bg="white")
+    ventana_laberinto.configure(bg="#292826")
 
     canvas_turtle = ScrolledCanvas(ventana_laberinto, width=600, height=600)
     canvas_turtle.place(x=50, y=50)
@@ -185,13 +202,15 @@ def mostrar_laberinto(nombre):
     turtle.speed(0)
     turtle.penup()
     turtle.hideturtle()
-    turtle._tracer(0, 0)  # ❗ Esto evita que se vea la animación de construcción
+    turtle._tracer(0, 0)  #Evita que se vea la animación de construcción
+
+    turtle.screen.bgcolor("#292826")
 
     laberinto = maps.MAZE_DICC[nombre]
 
     # Dibuja laberinto sin animación
     dibujar_laberinto(turtle, laberinto)
-    turtle._update()  # ❗ Dibuja todo de golpe
+    turtle._update()  # Dibuja todo de golpe
 
     # Ya puedes continuar como normalmente con la búsqueda
     x_inicio, y_inicio = encontrar_inicio(turtle, laberinto)
@@ -226,41 +245,68 @@ def mostrar_laberinto(nombre):
 
     ventana_laberinto.mainloop()
 
+#Funcion main (llama las funciones anteriores en el orden deseado):
 def main():
 
+    #Configuracion de la ventana:
     menu_principal = tk.Tk()
-    menu_principal.title("Menu de laberintos")
-    menu_principal.geometry("400x650")
-    menu_principal.configure(bg="#34b800")
+    menu_principal.title("A-MAZE-ZING")
+    menu_principal.geometry("525x727")
+    menu_principal.configure(bg="#292826")
+    menu_principal.resizable(False, False)
 
-    #Agregar texto dentro de la ventana
-    titulo = tk.Label(
-        menu_principal,
-        text="MENU DE LABERINTOS",
-        font=("Arial", 30, "bold"),
-        bg="#34b800",
-        fg="black"
-    )
-    titulo.pack(pady=20)
+    #Agregar logo de la applicacion:
+    Titulo_Amazezing = PhotoImage(file=RUTA_TITULO_AMZ)
+    frame_titulo = tk.Frame(menu_principal, bg="#292826")
+    frame_titulo.pack(pady=10)
+    tk.Label(frame_titulo, image=Titulo_Amazezing, bg="#292826").pack(pady=10)
 
+    #Canvas para botones:
+    frame_canvas = tk.Frame(menu_principal, bg="#292826")
+    frame_canvas.pack()
+    canvas = tk.Canvas(frame_canvas, width=1100, height=430, bg="#292826", highlightthickness=0)
+    canvas.pack()
+
+    #Cargar botones:
+    botones_on = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}On.png')) for color in colores}
+    botones_off = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}Off.png')) for color in colores}
+
+    fuente = ("Arial", 20)
+    espacio_x = 260
+    espacio_y = 85
+
+    for texto, col, fila, color in metodos:
+        x = espacio_x * col - espacio_x / 2
+        y = espacio_y * fila - espacio_y / 2
+
+        imagen_id = canvas.create_image(x, y + 2, image=botones_off[color])
+        sombra_id = canvas.create_text(x + 2, y + 2, text=texto, font=fuente, fill="black")
+        texto_id = canvas.create_text(x, y, text=texto, font=fuente, fill="white")
+
+        def al_presionar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color):
+            canvas.itemconfig(img, image=botones_on[col])
+            canvas.itemconfig(txt, fill="gray")
+            canvas.move(txt, 0, 6)
+            canvas.move(sombra, 0, 6)
+
+        def al_soltar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color, nombre=texto):
+            canvas.itemconfig(img, image=botones_off[col])
+            canvas.itemconfig(txt, fill="white")
+            canvas.move(txt, 0, -6)
+            canvas.move(sombra, 0, -6)
+            abrir_ventana_laberinto(nombre)
+
+        for item in [imagen_id, texto_id, sombra_id]:
+            canvas.tag_bind(item, "<ButtonPress-1>", al_presionar)
+            canvas.tag_bind(item, "<ButtonRelease-1>", al_soltar)
+
+    #Funcion para cerrar la ventana del menu al seleccionar laberinto
     def abrir_ventana_laberinto(nombre):
         menu_principal.destroy()
         mostrar_laberinto(nombre)
 
-    for nombre in maps.MAZE_DICC:
-        boton = tk.Button(
-            menu_principal,
-            text=nombre,
-            font=("Arial", 16, "bold"),
-            width=20,
-            height=2,    
-            fg="black",            
-            bd=2,
-            command=lambda n=nombre: abrir_ventana_laberinto(n)
-        )
-        boton.pack(pady=5)
-
     menu_principal.mainloop()
 
+#Ejecucion de la funcion main:
 if __name__ == "__main__":
     main()

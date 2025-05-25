@@ -110,17 +110,14 @@ MAZE_7 = []
 
 MAZE_8 = []
 
-MAZE_9 = []
-
 MAZE_DICC = {
 
-    "Laberinto 1": MAZE_1,
-    "laberinto 2": MAZE_2,
-    "laberinto 3": MAZE_3,
-    "laberinto 4": MAZE_4,
-    "laberinto 5": MAZE_5,
-    "laberinto 6": MAZE_6,
-    "laberinto 7": MAZE_7,
-    "laberinto 8": MAZE_8,
-    "laberinto 9": MAZE_9
+    "Maze 1": MAZE_1,
+    "Maze 2": MAZE_2,
+    "Maze 3": MAZE_3,
+    "Maze 4": MAZE_4,
+    "Maze 5": MAZE_5,
+    "Maze 6": MAZE_6,
+    "Maze 7": MAZE_7,
+    "Maze 8": MAZE_8
 }
