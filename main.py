@@ -1,3 +1,4 @@
+'''Version 3.5    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
 #Librerias ----------------------------------------------------------------------------------------------
 import turtle as t
 import time
@@ -15,16 +16,18 @@ RUTA_PREVIEWS = os.path.join("Assets", "Preview")
 
 #Variables  ---------------------------------------------------------------------------------------------
 Tamaño_celda = 15
+#Fuente en variable para que concuerden los textos:
+fuente = ("Arial Black", 20)
 colores = ["Rojo", "Azul", "Amarillo", "Verde"]
-metodos = [
-        ("Maze 1", 1, 1, "Verde"),
-        ("Maze 2", 2, 1, "Azul"),
-        ("Maze 3", 1, 2, "Rojo"),
-        ("Maze 4", 2, 2, "Amarillo"),
-        ("Maze 5", 1, 3, "Azul"),
-        ("Maze 6", 2, 3, "Verde"),
-        ("Maze 7", 1, 4, "Amarillo"),
-        ("Your Maze", 2, 4, "Rojo")
+botones_MenuPrincipal = [
+        ("Maze 1", 1, 1, "Verde"), ("Maze 2", 2, 1, "Azul"),
+        ("Maze 3", 1, 2, "Rojo"), ("Maze 4", 2, 2, "Amarillo"),
+        ("Maze 5", 1, 3, "Azul"), ("Maze 6", 2, 3, "Verde"),
+        ("Maze 7", 1, 4, "Amarillo"),("Your Maze", 2, 4, "Rojo")
+]
+botones_VentanaLaberinto = [
+        ("Return", 1, 1, "Rojo"), ("Start/Pause", 2, 1, "Amarillo"), 
+        ("Restart", 3, 1, "Verde"), ("Extra", 4, 1, "Azul")
 ]
 
 #Funciones ----------------------------------------------------------------------------------------------
@@ -190,6 +193,82 @@ def camino_mas_corto(laberinto, inicio, meta):
     return []
 
 #Funcion que imprime el laberinto a resolver:
+def crear_ventana_laberinto(nombre):
+    #Configuracion basica de la ventana que mostrara el laberinto:
+    ventana_laberinto = tk.Tk()
+    ventana_laberinto.title(f'Laberinto - {nombre}')
+    ventana_laberinto.geometry("1000x670")
+    ventana_laberinto.configure(bg="#292826")
+    ventana_laberinto.resizable(False, False)
+
+    #Frame izquierdo (lugar donde se muestra la resolucion del laberinto):
+    frame_laberinto = tk.Frame(ventana_laberinto, bg="#92149D")
+    frame_laberinto.place(x=10, y=10, width=650, height=550)
+
+    #mostrar la resolucion del laberinto llamando a la funcion mostrar_laberinto():
+    canvas_turtle = ScrolledCanvas(frame_laberinto, width=650, height=550)
+    canvas_turtle.pack()
+    turtle = RawTurtle(canvas_turtle)
+    turtle.speed("fastest")
+    turtle.penup()
+    turtle.hideturtle()
+    turtle._tracer(0, 0)
+    turtle.screen.bgcolor("#292826")
+
+    #Frame derecho (Informacion del laberinto)
+    frame_info = tk.Frame(ventana_laberinto, bg="#3EA44F")
+    frame_info.place(x=670, y=10, width=315, height=550)
+
+    # Canvas para botones (abajo de los recuadros):
+    frame_canvas = tk.Frame(ventana_laberinto, bg="#292826")
+    frame_canvas.place(x=0, y=570, width=1000, height=130)
+
+    canvas = tk.Canvas(frame_canvas, width=1000, height=130, bg="#292826", highlightthickness=0)
+    canvas.pack()
+
+
+    #Cargar botones:
+    botones_on = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}On.png')) for color in colores}
+    botones_off = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}Off.png')) for color in colores}
+
+    espacio_x = 251
+    espacio_y = 85
+
+    #Botones con efecto al ser presionados:
+    for texto, col, fila, color in botones_VentanaLaberinto:
+        x = espacio_x * col - espacio_x / 2
+        y = espacio_y * fila - espacio_y / 2
+
+        imagen_id = canvas.create_image(x, y + 2, image=botones_off[color])
+        sombra_id = canvas.create_text(x + 2, y + 2, text=texto, font=fuente, fill="black")
+        texto_id = canvas.create_text(x, y, text=texto, font=fuente, fill="white")
+
+        def al_presionar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color):
+            canvas.itemconfig(img, image=botones_on[col])
+            canvas.itemconfig(txt, fill="gray")
+            canvas.move(txt, 0, 6)
+            canvas.move(sombra, 0, 6)
+
+        def al_soltar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color, nombre=texto):
+            canvas.itemconfig(img, image=botones_off[col])
+            canvas.itemconfig(txt, fill="white")
+            canvas.move(txt, 0, -6)
+            canvas.move(sombra, 0, -6)
+
+            #Diferentes comandos dependiendo del boton
+            if nombre == "Return":
+                pass
+            elif nombre == "Start/Pause":
+                pass
+            elif nombre == "Restart":
+                pass
+            elif nombre == "Extra":
+                pass
+
+    ventana_laberinto.mainloop()
+    return ventana_laberinto, turtle
+
+"""
 def mostrar_laberinto(nombre):
     ventana_laberinto = tk.Tk()
     ventana_laberinto.title(f'Laberinto - {nombre}')
@@ -245,7 +324,7 @@ def mostrar_laberinto(nombre):
         time.sleep(0.05)
 
     ventana_laberinto.mainloop()
-
+"""
 #Funcion main (llama las funciones anteriores en el orden deseado) --------------------------------------
 def main():
 
@@ -262,9 +341,6 @@ def main():
     frame_titulo.pack(pady=10)
     tk.Label(frame_titulo, image=Titulo_Amazezing, bg="#292826").pack(pady=10)
 
-    #Fuente en variable para que concuerden los textos:
-    fuente = ("Arial Black", 20)
-
     #Canvas para botones:
     frame_canvas = tk.Frame(menu_principal, bg="#292826")
     frame_canvas.pack()
@@ -277,7 +353,7 @@ def main():
 
     #Diccionario para guardar previews:
     previews = {}
-    for texto, _, _, _ in metodos:
+    for texto, _, _, _ in botones_MenuPrincipal:
         numero = ''.join(filter(str.isdigit, texto))
         if numero:
             nombre_preview = f"Maze{numero}_preview.png"
@@ -292,7 +368,7 @@ def main():
     espacio_y = 85
 
     #Botones con efecto al ser presionados:
-    for texto, col, fila, color in metodos:
+    for texto, col, fila, color in botones_MenuPrincipal:
         x = espacio_x * col - espacio_x / 2
         y = espacio_y * fila - espacio_y / 2
 
@@ -340,7 +416,8 @@ def main():
     #Funcion para cerrar la ventana del menu al seleccionar laberinto:
     def abrir_ventana_laberinto(nombre):
         menu_principal.destroy()
-        mostrar_laberinto(nombre)
+        crear_ventana_laberinto(nombre)
+        #mostrar_laberinto(nombre)
 
     #Texto con derechos de autor en el inferior de la ventana:
     derechos_autor = tk.Label(
