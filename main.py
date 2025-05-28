@@ -1,4 +1,4 @@
-'''Version 3.5    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
+'''Version 3.6    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
 #Librerias ----------------------------------------------------------------------------------------------
 import turtle as t
 import time
@@ -193,10 +193,60 @@ def camino_mas_corto(laberinto, inicio, meta):
     return []
 
 #Funcion que imprime el laberinto a resolver:
-def crear_ventana_laberinto(nombre):
+def mostrar_laberinto(nombre, turtle):
+
+    #Configuracion basica:
+    turtle.screen.bgcolor("#292826")
+    laberinto = maps.MAZE_DICC[nombre]
+
+    # Dibuja laberinto sin animación
+    dibujar_laberinto(turtle, laberinto)
+    turtle._update()  # Dibuja todo de golpe
+
+    # le otorga a la tortuga las coordenadas de las que debe empezar:
+    x_inicio, y_inicio = encontrar_inicio(turtle, laberinto)
+
+    #llamada a la funcion buscar_meta con backtracking
+    ruta_actual = []
+    visitados = set()
+    buscar_meta(turtle, laberinto, x_inicio, y_inicio, visitados, ruta_actual)
+
+    x_meta, y_meta = ruta_actual[-1]
+    ruta_corta = camino_mas_corto(laberinto, (x_inicio, y_inicio), (x_meta, y_meta))
+
+    turtle.showturtle()
+    def pintar_paso(i=0):
+        if i >= len(ruta_corta):
+            return
+        
+        x, y = ruta_corta[i]
+ 
+        # Orientar tortuga
+        if i > 0:
+            x_ant, y_ant = ruta_corta[i - 1]
+            dx = x - x_ant
+            dy = y - y_ant
+            orientacion_turtle(turtle, (dx, dy))
+
+        # Mover y pintar
+        screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
+        screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
+        turtle.goto(screen_x, screen_y)
+        turtle.dot(10, "blue")
+        turtle.getscreen().update()
+        
+        # Llama al siguiente paso después de 50 ms
+        turtle.screen.ontimer(lambda: pintar_paso(i + 1), 50)
+
+    # Comienza la animación con el primer paso
+    pintar_paso()
+
+
+#Funcion para crear la ventana donde se mostrara el laberinto y su informacion/resolucion:
+def crear_ventana_laberinto(nombre_laberinto):
     #Configuracion basica de la ventana que mostrara el laberinto:
     ventana_laberinto = tk.Tk()
-    ventana_laberinto.title(f'Laberinto - {nombre}')
+    ventana_laberinto.title(f'Laberinto - {nombre_laberinto}')
     ventana_laberinto.geometry("1000x670")
     ventana_laberinto.configure(bg="#292826")
     ventana_laberinto.resizable(False, False)
@@ -226,7 +276,6 @@ def crear_ventana_laberinto(nombre):
     canvas = tk.Canvas(frame_canvas, width=1000, height=130, bg="#292826", highlightthickness=0)
     canvas.pack()
 
-
     #Cargar botones:
     botones_on = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}On.png')) for color in colores}
     botones_off = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}Off.png')) for color in colores}
@@ -249,84 +298,32 @@ def crear_ventana_laberinto(nombre):
             canvas.move(txt, 0, 6)
             canvas.move(sombra, 0, 6)
 
-        def al_soltar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color, nombre=texto):
+        def al_soltar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color, nombre_boton=texto):
             canvas.itemconfig(img, image=botones_off[col])
             canvas.itemconfig(txt, fill="white")
             canvas.move(txt, 0, -6)
             canvas.move(sombra, 0, -6)
 
             #Diferentes comandos dependiendo del boton
-            if nombre == "Return":
+            if nombre_boton == "Return":
+                ventana_laberinto.destroy()
+                menu_principal()
+            elif nombre_boton == "Start/Pause":
+                mostrar_laberinto(nombre_laberinto, turtle)
+            elif nombre_boton == "Restart":
                 pass
-            elif nombre == "Start/Pause":
+            elif nombre_boton == "Extra":
                 pass
-            elif nombre == "Restart":
-                pass
-            elif nombre == "Extra":
-                pass
+
+        for item in [imagen_id, texto_id, sombra_id]:
+            canvas.tag_bind(item, "<ButtonPress-1>", al_presionar)
+            canvas.tag_bind(item, "<ButtonRelease-1>", al_soltar)
 
     ventana_laberinto.mainloop()
     return ventana_laberinto, turtle
 
-"""
-def mostrar_laberinto(nombre):
-    ventana_laberinto = tk.Tk()
-    ventana_laberinto.title(f'Laberinto - {nombre}')
-    ventana_laberinto.geometry("1000x700")
-    ventana_laberinto.configure(bg="#292826")
-
-    canvas_turtle = ScrolledCanvas(ventana_laberinto, width=600, height=600)
-    canvas_turtle.place(x=50, y=50)
-
-    turtle = RawTurtle(canvas_turtle)
-    turtle.speed(0)
-    turtle.penup()
-    turtle.hideturtle()
-    turtle._tracer(0, 0)  #Evita que se vea la animación de construcción
-
-    turtle.screen.bgcolor("#292826")
-
-    laberinto = maps.MAZE_DICC[nombre]
-
-    # Dibuja laberinto sin animación
-    dibujar_laberinto(turtle, laberinto)
-    turtle._update()  # Dibuja todo de golpe
-
-    # Ya puedes continuar como normalmente con la búsqueda
-    x_inicio, y_inicio = encontrar_inicio(turtle, laberinto)
-
-    ruta_actual = []
-    visitados = set()
-    buscar_meta(turtle, laberinto, x_inicio, y_inicio, visitados, ruta_actual)
-
-    x_meta, y_meta = ruta_actual[-1]
-    ruta_corta = camino_mas_corto(laberinto, (x_inicio, y_inicio), (x_meta, y_meta))
-
-    time.sleep(1)  # Espera tras la búsqueda
-
-    turtle.showturtle()
-    for i in range(len(ruta_corta)):
-        x, y = ruta_corta[i]
-
-        # Orientar tortuga
-        if i > 0:
-            x_ant, y_ant = ruta_corta[i - 1]
-            dx = x - x_ant
-            dy = y - y_ant
-            orientacion_turtle(turtle, (dx, dy))
-
-        # Mover y pintar
-        screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
-        screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
-        turtle.goto(screen_x, screen_y)
-        turtle.dot(10, "blue")
-        turtle.getscreen().update()
-        time.sleep(0.05)
-
-    ventana_laberinto.mainloop()
-"""
 #Funcion main (llama las funciones anteriores en el orden deseado) --------------------------------------
-def main():
+def menu_principal():
 
     #Configuracion de la ventana:
     menu_principal = tk.Tk()
@@ -417,7 +414,6 @@ def main():
     def abrir_ventana_laberinto(nombre):
         menu_principal.destroy()
         crear_ventana_laberinto(nombre)
-        #mostrar_laberinto(nombre)
 
     #Texto con derechos de autor en el inferior de la ventana:
     derechos_autor = tk.Label(
@@ -433,4 +429,4 @@ def main():
 
 #Ejecucion de la funcion main:
 if __name__ == "__main__":
-    main()
+    menu_principal()
