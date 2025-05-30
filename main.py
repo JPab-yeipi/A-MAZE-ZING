@@ -202,7 +202,7 @@ def mostrar_laberinto(nombre, turtle):
     # Dibuja laberinto sin animación
     dibujar_laberinto(turtle, laberinto)
     turtle._update()  # Dibuja todo de golpe
-
+#'''
     # le otorga a la tortuga las coordenadas de las que debe empezar:
     x_inicio, y_inicio = encontrar_inicio(turtle, laberinto)
 
@@ -240,7 +240,7 @@ def mostrar_laberinto(nombre, turtle):
 
     # Comienza la animación con el primer paso
     pintar_paso()
-
+#'''
 
 #Funcion para crear la ventana donde se mostrara el laberinto y su informacion/resolucion:
 def crear_ventana_laberinto(nombre_laberinto):
