@@ -1,6 +1,7 @@
-'''Version 4.0    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
+'''Version 4.1    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
 #Librerias ----------------------------------------------------------------------------------------------
 import turtle as t
+import random
 import time
 import maps
 import tkinter as tk
@@ -197,9 +198,19 @@ def camino_mas_corto(laberinto, inicio, meta):
                     visitados.add((nx, ny))
     return []
 
-#Funcion para crear laberinto random:
-def crear_random_maze(dificultad, alto, ancho, bifurcaciones):
-    pass
+def crear_random_desde_ajustes(alto, ancho, bif, dificultad, ventana_a_cerrar=None):
+    # Genera el laberinto y guárdalo
+    lab = maps.crear_random_maze(alto, ancho, dificultad, bif)
+
+    # Lo insertamos en el diccionario (para que mostrar_laberinto lo encuentre)
+    maps.MAZE_DICC["Random Maze"] = lab
+
+    # Cierra ventana anterior si se pasa como argumento
+    if ventana_a_cerrar:
+        ventana_a_cerrar.destroy()
+
+    # Llama la nueva ventana con el laberinto generado
+    crear_ventana_laberinto("Random Maze")
 
 #Funcion que imprime el laberinto a resolver:
 def mostrar_laberinto(nombre, turtle):
@@ -363,7 +374,7 @@ def ventana_random_Maze():
     espacio_x = 300
     espacio_y = 65
 
-    estado_seleccion = {"actual": None}
+    estado_seleccion = {"actual_nombre": None, "actual_valor": None}
     botones_ids = {}
 
     #Botones de dificultad
@@ -378,8 +389,8 @@ def ventana_random_Maze():
         botones_ids[texto] = (imagen_id, texto_id, sombra_id, color)
 
         def al_soltar(event, nombre_boton=texto):
-            if estado_seleccion["actual"] and estado_seleccion["actual"] != nombre_boton:
-                img_id, txt_id, sombra_id, col_ant = botones_ids[estado_seleccion["actual"]]
+            if estado_seleccion["actual_nombre"] and estado_seleccion["actual_nombre"] != nombre_boton:
+                img_id, txt_id, sombra_id, col_ant = botones_ids[estado_seleccion["actual_nombre"]]
                 canvas_dificultad.itemconfig(img_id, image=botones_off[col_ant])
                 canvas_dificultad.itemconfig(txt_id, fill="white")
                 canvas_dificultad.move(txt_id, 0, -6)
@@ -390,7 +401,13 @@ def ventana_random_Maze():
             canvas_dificultad.itemconfig(txt_id, fill="gray")
             canvas_dificultad.move(txt_id, 0, 6)
             canvas_dificultad.move(sombra_id, 0, 6)
-            estado_seleccion["actual"] = nombre_boton
+            niveles_dificultad = {
+                "Easy": 0.50,
+                "Medium": 0.35,
+                "Hard": 0.20
+            }
+            estado_seleccion["actual_nombre"] = nombre_boton
+            estado_seleccion["actual_valor"] = niveles_dificultad.get(nombre_boton)
 
             #Liberar botón Create si sigue bloqueado
             if "Create" in botones_ids:
@@ -408,12 +425,12 @@ def ventana_random_Maze():
     tk.Label(ventana_random, text="Elige las dimensiones del laberinto:", font=fuente, fg="white", bg="#292826").place(x=300, y=170)
 
     tk.Label(ventana_random, text="Alto:", font=fuente, fg="white", bg="#292826").place(x=180, y=230)
-    slider_alto = tk.Scale(ventana_random, from_=15, to=40, orient="horizontal", length=500, bg="#292826", fg="white", troughcolor="#81F1CA", highlightthickness=0)
+    slider_alto = tk.Scale(ventana_random, from_=15, to=35, orient="horizontal", length=500, bg="#292826", fg="white", troughcolor="#81F1CA", highlightthickness=0)
     slider_alto.set(20)
     slider_alto.place(x=240, y=220)
 
     tk.Label(ventana_random, text="Ancho:", font=fuente, fg="white", bg="#292826").place(x=155, y=280)
-    slider_ancho = tk.Scale(ventana_random, from_=15, to=40, orient="horizontal", length=500, bg="#292826", fg="white", troughcolor="#FFF152", highlightthickness=0)
+    slider_ancho = tk.Scale(ventana_random, from_=15, to=35, orient="horizontal", length=500, bg="#292826", fg="white", troughcolor="#FFF152", highlightthickness=0)
     slider_ancho.set(20)
     slider_ancho.place(x=240, y=270)
 
@@ -462,12 +479,18 @@ def ventana_random_Maze():
 
     #Función de creación
     def crear_laberinto():
-        dificultad = estado_seleccion["actual"]
+        dificultad = estado_seleccion["actual_valor"]
         alto = slider_alto.get()
         ancho = slider_ancho.get()
         bif = slider_bif.get()
         print(f"Generando laberinto con dificultad={dificultad}, alto={alto}, ancho={ancho}, bifurcaciones={bif}")
-        #crear_random_maze()
+        crear_random_desde_ajustes(
+            alto=slider_alto.get(),
+            ancho=slider_ancho.get(),
+            bif=slider_bif.get(),
+            dificultad = estado_seleccion["actual_valor"],
+            ventana_a_cerrar=ventana_random
+        )
 
     ventana_random.mainloop()
 

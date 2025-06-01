@@ -148,21 +148,66 @@ MAZE_6 = [
     "###################################"
 ]
 
-def Random_maze():
-    pass
-
 def your_maze():
     pass
 
+def crear_random_maze(alto, ancho, porcentaje_libres, bifurcaciones, callback=None):
+    import random
+
+    # Asegura que las dimensiones sean impares (para que haya muros)
+    if alto % 2 == 0:
+        alto += 1
+    if ancho % 2 == 0:
+        ancho += 1
+
+    laberinto = [["#" for _ in range(ancho)] for _ in range(alto)]
+
+    def en_rango(x, y):
+        return 0 < x < ancho - 1 and 0 < y < alto - 1
+
+    def carve(x, y):
+        laberinto[y][x] = " "
+        dirs = [(2, 0), (-2, 0), (0, 2), (0, -2)]
+        random.shuffle(dirs)
+        for dx, dy in dirs:
+            nx, ny = x + dx, y + dy
+            if en_rango(nx, ny) and laberinto[ny][nx] == "#":
+                laberinto[y + dy // 2][x + dx // 2] = " "
+                carve(nx, ny)
+
+    # El punto inicial debe ser impar
+    inicio_x = random.randrange(1, ancho, 2)
+    inicio_y = random.randrange(1, alto, 2)
+    carve(inicio_x, inicio_y)
+    laberinto[inicio_y][inicio_x] = "S"
+
+    # Buscar punto más lejano para G
+    def distancia_manhattan(x1, y1, x2, y2):
+        return abs(x1 - x2) + abs(y1 - y2)
+
+    max_dist = -1
+    meta = (inicio_x, inicio_y)
+    for y in range(alto):
+        for x in range(ancho):
+            if laberinto[y][x] == " ":
+                dist = distancia_manhattan(inicio_x, inicio_y, x, y)
+                if dist > max_dist:
+                    max_dist = dist
+                    meta = (x, y)
+
+    gx, gy = meta
+    laberinto[gy][gx] = "G"
+
+    return laberinto
+
 
 MAZE_DICC = {
-
     "Maze 1": MAZE_1,
     "Maze 2": MAZE_2,
     "Maze 3": MAZE_3,
     "Maze 4": MAZE_4,
     "Maze 5": MAZE_5,
     "Maze 6": MAZE_6,
-    "Random Maze": Random_maze,
-    "Your Maze": your_maze
+    "Random Maze": [],
+    "Your Maze": []
 }
