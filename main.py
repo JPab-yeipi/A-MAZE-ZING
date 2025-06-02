@@ -1,4 +1,4 @@
-'''Version 4.2    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
+'''Version 4.3    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
 #Librerias ----------------------------------------------------------------------------------------------
 import turtle as t
 import random
@@ -277,7 +277,14 @@ def crear_ventana_laberinto(nombre_laberinto):
     # Configuración básica de la ventana
     ventana_laberinto = tk.Tk()
     ventana_laberinto.title(f'Laberinto - {nombre_laberinto}')
-    ventana_laberinto.geometry("1000x670")
+    # -----------------------------------------------------------
+    # Dimensiones fijas: 1000×670, pero ahora centradas:
+    screen_w = ventana_laberinto.winfo_screenwidth()
+    screen_h = ventana_laberinto.winfo_screenheight()
+    x = (screen_w - 1000) // 2
+    y = (screen_h - 670) // 2
+    ventana_laberinto.geometry(f"1000x670+{x}+{y}")
+    # -----------------------------------------------------------
     ventana_laberinto.configure(bg="#292826")
     ventana_laberinto.resizable(False, False)
 
@@ -399,7 +406,14 @@ def crear_ventana_laberinto(nombre_laberinto):
 def ventana_random_Maze():
     ventana_random = tk.Tk()
     ventana_random.title('Random Maze Settings')
-    ventana_random.geometry("1000x540")
+    # ------------------------------------------------------------
+    # Dimensiones fijas: 1000×540, centradas
+    screen_w = ventana_random.winfo_screenwidth()
+    screen_h = ventana_random.winfo_screenheight()
+    x = (screen_w - 1000) // 2
+    y = (screen_h - 540) // 2
+    ventana_random.geometry(f"1000x540+{x}+{y}")
+    # ------------------------------------------------------------
     ventana_random.configure(bg="#292826")
     ventana_random.resizable(False, False)
 
@@ -546,7 +560,14 @@ def menu_principal():
     #Configuracion de la ventana:
     menu_principal = tk.Tk()
     menu_principal.title("A-MAZE-ZING")
-    menu_principal.geometry("525x750")
+    # ------------------------------------------------------------
+    # Dimensiones fijas: 525×750, centradas
+    screen_w = menu_principal.winfo_screenwidth()
+    screen_h = menu_principal.winfo_screenheight()
+    x = (screen_w - 525) // 2
+    y = (screen_h - 820) // 2
+    menu_principal.geometry(f"525x750+{x}+{y}")
+    # ------------------------------------------------------------
     menu_principal.configure(bg="#292826")
     menu_principal.resizable(False, False)
 
