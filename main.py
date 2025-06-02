@@ -1,4 +1,4 @@
-'''Version 4.1    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
+'''Version 4.2    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
 #Librerias ----------------------------------------------------------------------------------------------
 import turtle as t
 import random
@@ -27,7 +27,7 @@ botones_MenuPrincipal = [
         ("Random Maze", 1, 4, "Morado"),("Your Maze", 2, 4, "Naranja")
 ]
 botones_VentanaLaberinto = [
-        ("Return", 1, 1, "Rojo"), ("Start/Pause", 2, 1, "Amarillo"), 
+        ("Return", 1, 1, "Rojo"), ("Start", 2, 1, "Amarillo"), 
         ("Restart", 3, 1, "Verde"), ("Extra", 4, 1, "Azul")
 ]
 botones_random = [
@@ -114,38 +114,37 @@ def orientacion_turtle(turtle, direccion):
         turtle.setheading(90)
 
 #Funcion para encontrar la meta con backtracking:
-def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
-    #En caso de que se encuentre la meta:
+def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual, estado_animacion):
+    if estado_animacion["cancelada"]:
+        return False
+
     if laberinto[y][x] == 'G':
         ruta_actual.append((x, y))
         screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
         screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
         turtle.goto(screen_x, screen_y)
-        turtle.dot(10, "blue")  # Marca exacta sobre G
+        turtle.dot(10, "blue")
         turtle.hideturtle()
         turtle.getscreen().update()
         return True
 
-    #Evitar repetir o chocar con muros:
     if (x, y) in visitados or laberinto[y][x] == '#':
         return False
 
-    #Marca la celda actual como visitada para futuro conocimiento:
     visitados.add((x, y))
     ruta_actual.append((x, y))
 
-    # Mover la tortuga a la celda actual
     screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
     screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
     turtle.goto(screen_x, screen_y)
-    turtle.dot(10, "green")  # Celda explorada
+    turtle.dot(10, "green")
     turtle.getscreen().update()
     time.sleep(0.02)
+    if estado_animacion["cancelada"]:
+        return False
 
-    # Direcciones: derecha, abajo, izquierda, arriba
     direcciones = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
-    #Explora en cada direccion:
     for dx, dy in direcciones:
         nuevo_x, nuevo_y = x + dx, y + dy
 
@@ -153,15 +152,12 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
             if laberinto[nuevo_y][nuevo_x] != '#' and (nuevo_x, nuevo_y) not in visitados:
                 orientacion_turtle(turtle, (dx, dy))
 
-                if buscar_meta(turtle, laberinto, nuevo_x, nuevo_y, visitados, ruta_actual):
-                    turtle.dot(10, "blue")
+                if buscar_meta(turtle, laberinto, nuevo_x, nuevo_y, visitados, ruta_actual, estado_animacion):
                     return True
 
-    # Punto sin salida se marca de color naranja:
     turtle.dot(10, "orange")
-
-    # Retroceso físico
     ruta_actual.pop()
+
     if len(ruta_actual) > 0:
         paso_anterior = ruta_actual[-1]
         dx = paso_anterior[0] - x
@@ -171,9 +167,11 @@ def buscar_meta(turtle, laberinto, x, y, visitados, ruta_actual):
         screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + paso_anterior[0] * Tamaño_celda + Tamaño_celda // 2
         screen_y = len(laberinto) * Tamaño_celda // 2 - paso_anterior[1] * Tamaño_celda - Tamaño_celda // 2
         turtle.goto(screen_x, screen_y)
-        turtle.dot(10, "green")  # Camino correcto
+        turtle.dot(10, "green")
         turtle.getscreen().update()
         time.sleep(0.02)
+        if estado_animacion["cancelada"]:
+            return False
 
     return False
 
@@ -184,19 +182,23 @@ def camino_mas_corto(laberinto, inicio, meta):
     visitados = set()
     visitados.add(inicio)
 
+    direcciones = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+
     while queue:
         (x, y), ruta = queue.popleft()
 
         if (x, y) == meta:
             return ruta
         
-        for dx, dy in [(1,0), (0, 1), (-1, 0), (0, -1)]:
+        for dx, dy in direcciones:
             nx, ny = x + dx, y + dy
             if 0 <= ny < len(laberinto) and 0 <= nx < len(laberinto[0]):
                 if laberinto[ny][nx] != '#' and (nx, ny) not in visitados:
-                    queue.append(((nx, ny), ruta + [(nx, ny)]))
                     visitados.add((nx, ny))
+                    queue.append(((nx, ny), ruta + [(nx, ny)]))
+
     return []
+
 
 def crear_random_desde_ajustes(alto, ancho, bif, dificultad, ventana_a_cerrar=None):
     # Genera el laberinto y guárdalo
@@ -213,69 +215,76 @@ def crear_random_desde_ajustes(alto, ancho, bif, dificultad, ventana_a_cerrar=No
     crear_ventana_laberinto("Random Maze")
 
 #Funcion que imprime el laberinto a resolver:
-def mostrar_laberinto(nombre, turtle):
-
-    #Configuracion basica:
+def mostrar_laberinto(nombre, turtle, estado_animacion):
+    # Configuración básica
+    turtle.clear()
+    turtle.hideturtle()
     turtle.screen.bgcolor("#292826")
     laberinto = maps.MAZE_DICC[nombre]
 
-    # Dibuja laberinto sin animación
     dibujar_laberinto(turtle, laberinto)
-    turtle._update()  # Dibuja todo de golpe
-#'''
-    # le otorga a la tortuga las coordenadas de las que debe empezar:
-    x_inicio, y_inicio = encontrar_inicio(turtle, laberinto)
+    turtle._update()
 
-    #llamada a la funcion buscar_meta con backtracking
+    if estado_animacion["cancelada"]:
+        estado_animacion["cancelada"] = False
+        estado_animacion["activa"] = False
+        return
+
+    if estado_animacion["activa"]:
+        return  # Evita ejecuciones duplicadas
+
+    x_inicio, y_inicio = encontrar_inicio(turtle, laberinto)
     ruta_actual = []
     visitados = set()
-    buscar_meta(turtle, laberinto, x_inicio, y_inicio, visitados, ruta_actual)
+    estado_animacion["activa"] = True
+
+    buscar_meta(turtle, laberinto, x_inicio, y_inicio, visitados, ruta_actual, estado_animacion)
+
+    if not ruta_actual:
+        estado_animacion["activa"] = False
+        return
 
     x_meta, y_meta = ruta_actual[-1]
     ruta_corta = camino_mas_corto(laberinto, (x_inicio, y_inicio), (x_meta, y_meta))
 
-    turtle.showturtle()
     def pintar_paso(i=0):
-        if i >= len(ruta_corta):
+        if i >= len(ruta_corta) or estado_animacion["cancelada"]:
+            estado_animacion["activa"] = False
+            estado_animacion["cancelada"] = False
+            turtle.showturtle()
             return
-        
+
         x, y = ruta_corta[i]
- 
-        # Orientar tortuga
+
         if i > 0:
             x_ant, y_ant = ruta_corta[i - 1]
             dx = x - x_ant
             dy = y - y_ant
             orientacion_turtle(turtle, (dx, dy))
 
-        # Mover y pintar
         screen_x = -len(laberinto[0]) * Tamaño_celda // 2 + x * Tamaño_celda + Tamaño_celda // 2
         screen_y = len(laberinto) * Tamaño_celda // 2 - y * Tamaño_celda - Tamaño_celda // 2
         turtle.goto(screen_x, screen_y)
         turtle.dot(10, "blue")
         turtle.getscreen().update()
-        
-        # Llama al siguiente paso después de 50 ms
+
         turtle.screen.ontimer(lambda: pintar_paso(i + 1), 50)
 
-    # Comienza la animación con el primer paso
     pintar_paso()
-#'''
 
 #Funcion para crear la ventana donde se mostrara el laberinto y su informacion/resolucion:
 def crear_ventana_laberinto(nombre_laberinto):
-    #Configuracion basica de la ventana que mostrara el laberinto:
+    # Configuración básica de la ventana
     ventana_laberinto = tk.Tk()
     ventana_laberinto.title(f'Laberinto - {nombre_laberinto}')
     ventana_laberinto.geometry("1000x670")
     ventana_laberinto.configure(bg="#292826")
     ventana_laberinto.resizable(False, False)
 
-    #Frame izquierdo (lugar donde se muestra la resolucion del laberinto):
+    # Frame izquierdo (resolución del laberinto)
     frame_laberinto = tk.Frame(ventana_laberinto, bg="#92149D")
     frame_laberinto.place(x=10, y=10, width=650, height=550)
 
-    #mostrar la resolucion del laberinto llamando a la funcion mostrar_laberinto():
     canvas_turtle = ScrolledCanvas(frame_laberinto, width=650, height=550)
     canvas_turtle.pack()
     turtle = RawTurtle(canvas_turtle)
@@ -285,69 +294,106 @@ def crear_ventana_laberinto(nombre_laberinto):
     turtle._tracer(0, 0)
     turtle.screen.bgcolor("#292826")
 
-    #Frame derecho (Informacion del laberinto)
+    # Estado de animación controlado por botones
+    estado_animacion = {"activa": False, "cancelada": False}
+
+    # Obtener el laberinto desde el diccionario
+    laberinto = maps.MAZE_DICC[nombre_laberinto]
+
+    # Dibujar el laberinto estático al abrir la ventana
+    turtle.clear()
+    dibujar_laberinto(turtle, laberinto)
+    turtle._update()
+
+    # Frame derecho (información o extras)
     frame_info = tk.Frame(ventana_laberinto, bg="#3EA44F")
     frame_info.place(x=670, y=10, width=315, height=550)
 
-    # Canvas para botones (abajo de los recuadros):
+    # Frame inferior para botones
     frame_canvas = tk.Frame(ventana_laberinto, bg="#292826")
     frame_canvas.place(x=0, y=570, width=1000, height=130)
 
     canvas = tk.Canvas(frame_canvas, width=1000, height=130, bg="#292826", highlightthickness=0)
     canvas.pack()
 
-    #Cargar botones:
-    botones_on = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}On.png')) for color in colores}
+    # Cargar imágenes ON/OFF según colores definidos globalmente
+    botones_on  = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}On.png'))  for color in colores}
     botones_off = {color: PhotoImage(file=os.path.join(RUTA_BOTONES, f'BtnMaze{color}Off.png')) for color in colores}
 
     espacio_x = 251
     espacio_y = 85
 
-    #Botones con efecto al ser presionados:
+    # Diccionario para guardar referencias y estado de cada botón
+    botones_ids = {}
+
+    # Iterar sobre la lista global botones_VentanaLaberinto
     for texto, col, fila, color in botones_VentanaLaberinto:
         x = espacio_x * col - espacio_x / 2
         y = espacio_y * fila - espacio_y / 2
 
         imagen_id = canvas.create_image(x, y + 2, image=botones_off[color])
         sombra_id = canvas.create_text(x + 2, y + 2, text=texto, font=fuente, fill="black")
-        texto_id = canvas.create_text(x, y, text=texto, font=fuente, fill="white")
+        texto_id  = canvas.create_text(x, y, text=texto, font=fuente, fill="white")
 
-        def al_presionar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color):
-            canvas.itemconfig(img, image=botones_on[col])
-            canvas.itemconfig(txt, fill="gray")
-            canvas.move(txt, 0, 6)
-            canvas.move(sombra, 0, 6)
+        botones_ids[texto] = {
+            "imagen": imagen_id,
+            "texto": texto_id,
+            "sombra": sombra_id,
+            "color": color,
+            "habilitado": True
+        }
 
-        def al_soltar(event, img=imagen_id, txt=texto_id, sombra=sombra_id, col=color, nombre_boton=texto):
-            canvas.itemconfig(img, image=botones_off[col])
-            canvas.itemconfig(txt, fill="white")
-            canvas.move(txt, 0, -6)
-            canvas.move(sombra, 0, -6)
+        # Evento <ButtonPress-1> para mostrar efecto ON (solo si está habilitado)
+        def al_presionar(event, btn=texto):
+            info = botones_ids[btn]
+            if btn == "Start" and not info["habilitado"]:
+                return
+            canvas.itemconfig(info["imagen"], image=botones_on[info["color"]])
+            canvas.itemconfig(info["texto"], fill="gray")
+            canvas.move(info["texto"], 0, 6)
+            canvas.move(info["sombra"], 0, 6)
 
-            #Diferentes comandos dependiendo del boton
-            if nombre_boton == "Return":
+        # Evento <ButtonRelease-1> con la lógica de cada botón
+        def al_soltar(event, btn=texto):
+            info = botones_ids[btn]
+            if btn == "Start" and not info["habilitado"]:
+                return
+
+            # Si NO es “Start”, regresamos la imagen a OFF
+            if btn != "Start":
+                canvas.itemconfig(info["imagen"], image=botones_off[info["color"]])
+                canvas.itemconfig(info["texto"], fill="white")
+                canvas.move(info["texto"], 0, -6)
+                canvas.move(info["sombra"], 0, -6)
+            else:
+                # Si es Start, lo dejamos en ON y lo bloqueamos
+                info["habilitado"] = False
+
+            # Lógica específica según el texto del botón
+            if btn == "Return":
                 ventana_laberinto.destroy()
                 menu_principal()
-            elif nombre_boton == "Start/Pause":
-                mostrar_laberinto(nombre_laberinto, turtle)
-            elif nombre_boton == "Restart":
-                turtle.clear()
-                turtle.reset()
-                turtle.speed("fastest")
-                turtle.penup()
-                turtle.hideturtle()
-                turtle._tracer(0, 0)
-                turtle.screen.bgcolor("#292826")
-                mostrar_laberinto(nombre_laberinto, turtle)  # Redibuja el laberinto
-            elif nombre_boton == "Extra":
-                pass
 
-        for item in [imagen_id, texto_id, sombra_id]:
+            elif btn == "Start":
+                # Inicia la animación si no está ya activa
+                if not estado_animacion["activa"]:
+                    mostrar_laberinto(nombre_laberinto, turtle, estado_animacion)
+                # Queda bloqueado hasta que se presione Restart
+
+            elif btn == "Restart":
+                # Destruir la ventana actual y recrearla completamente
+                ventana_laberinto.destroy()
+                crear_ventana_laberinto(nombre_laberinto)
+
+            elif btn == "Extra":
+                pass  # Agrega aquí cualquier funcionalidad extra que necesites
+
+        # Asignar bindings a cada parte visual del botón
+        for item in (imagen_id, texto_id, sombra_id):
             canvas.tag_bind(item, "<ButtonPress-1>", al_presionar)
             canvas.tag_bind(item, "<ButtonRelease-1>", al_soltar)
 
     ventana_laberinto.mainloop()
-    return ventana_laberinto, turtle
 
 #Funcion que crea la ventana de ajustes para crear el laberinto random:
 def ventana_random_Maze():
