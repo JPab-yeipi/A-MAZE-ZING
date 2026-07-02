@@ -1,4 +1,4 @@
-'''Version 4.6    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
+'''Version 4.7'''
 #Librerias ----------------------------------------------------------------------------------------------
 import random
 import math

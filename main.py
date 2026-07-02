@@ -1,4 +1,4 @@
-'''Version 4.6    Autor: Jose Pablo Garcia Zamudio    Github: JPab-Dev'''
+'''Version 4.7'''
 #Librerias ----------------------------------------------------------------------------------------------
 import time
 import maps
@@ -9,9 +9,10 @@ from collections import deque
 from turtle import RawTurtle, ScrolledCanvas
 
 #Ruta de assets -----------------------------------------------------------------------------------------
-RUTA_TITULO_AMZ = os.path.join("Assets", "AMAZEZINGTtl.png")
-RUTA_BOTONES = os.path.join("Assets", "Botones")
-RUTA_PREVIEWS = os.path.join("Assets", "Preview")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+RUTA_TITULO_AMZ = os.path.join(BASE_DIR, "Assets", "AMAZEZINGTtl.png")
+RUTA_BOTONES = os.path.join(BASE_DIR, "Assets", "Botones")
+RUTA_PREVIEWS = os.path.join(BASE_DIR, "Assets", "Preview")
 
 #Variables  ---------------------------------------------------------------------------------------------
 Tamaño_celda = 15
