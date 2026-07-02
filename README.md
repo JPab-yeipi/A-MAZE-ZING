@@ -40,7 +40,7 @@ Features include:
 - 🎨 Animated custom buttons
 
 <p align="center">
-  <img src="Images/menu.png" width="600">
+  <img src="Images/menu.png" width="400">
 </p>
 
 ---
@@ -62,7 +62,7 @@ Color coding makes the execution easy to follow:
 A statistics panel updates while the algorithm is running, making it easy to understand exactly what is happening internally.
 
 <p align="center">
-  <img src="Images/maze_solver.png" width="900">
+  <img src="Images/maze_solver.png" width="700">
 </p>
 
 ---
@@ -81,7 +81,7 @@ The generator allows you to customize:
 Every generated maze is guaranteed to be solvable and can immediately be visualized inside the application.
 
 <p align="center">
-  <img src="Images/random_maze.png" width="900">
+  <img src="Images/random_maze.png" width="700">
 </p>
 
 ---
